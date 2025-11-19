@@ -1,0 +1,8 @@
+- gather_facts: false
+  hosts: Abakan_191_Mikrotik_RB750GR3
+  ignore_unreachable: true
+  tasks:
+  - community.routeros.command:
+      commands:
+      - /ip firewall filter remove numbers=21
+    name: Удаление правила с номером 21

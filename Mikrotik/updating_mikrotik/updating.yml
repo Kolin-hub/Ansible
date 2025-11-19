@@ -1,0 +1,39 @@
+---
+- name: Update MikroTik Firmware to Long-Term
+  hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Set firmware channel to long-term
+      community.routeros.command:
+        commands:
+          - /system package update set channel=long-term
+        interval: 1
+        match: all
+        retries: 10
+        wait_for: null
+      register: set_channel_result
+
+    - name: Check for updates
+      community.routeros.command:
+        commands:
+          - /system package update check-for-updates
+        interval: 1
+        match: all
+        retries: 10
+        wait_for: null
+      register: check_updates_result
+
+    - name: Download updates
+      community.routeros.command:
+        commands:
+          - /system package update download
+        interval: 1
+        match: all
+        retries: 10
+        wait_for: null
+      register: download_updates_result
+
+    - name: Wait for 60 seconds to allow download to complete
+      pause:
+        seconds: 60

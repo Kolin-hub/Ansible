@@ -1,0 +1,21 @@
+---
+- name: Export Firewall Rules from MikroTik, Download and Compare with Confluence Rules
+  hosts: all
+  gather_facts: no
+  ignore_unreachable: true
+  tasks:
+    - name: Export firewall rules to a file on the MikroTik device
+      community.routeros.command:
+        commands:
+          - /ip firewall filter print without-paging
+      register: mikrotik_export
+       
+    - name: Save firewall rules to temporary file
+      copy:
+        content: "{{ mikrotik_export.stdout[0] }}"
+        dest: "/var/lib/awx/projects/_15__firewall/Firewall/{{ inventory_hostname }}_firewall_rules.txt"
+      delegate_to: localhost
+
+    - name: Run the Python script
+      command: python3 /var/lib/awx/projects/_15__firewall/Firewall/Firewall_Rule.py
+      delegate_to: localhost

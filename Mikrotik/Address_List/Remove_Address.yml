@@ -1,0 +1,6 @@
+- hosts: Almetyevsk_253_Mikrotik_RB750GR3
+  tasks:
+  - community.routeros.command:
+      commands:
+      - /ip firewall address-list remove numbers=32
+    name: Remove address list 32

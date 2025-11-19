@@ -1,0 +1,4 @@
+--- 
+collections:
+- name: community.routeros
+  source: https://galaxy.ansible.com

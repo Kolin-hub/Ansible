@@ -1,0 +1,21 @@
+---
+- name: Export MikroTik configuration
+  hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Connect to MikroTik devices and export configuration
+      community.routeros.command:
+        commands:
+          - /export
+      register: mikrotik_config
+
+    - name: Save configuration to temporary file
+      copy:
+        content: "{{ mikrotik_config.stdout[0] }}"
+        dest: "/var/lib/awx/projects/_12__backup_network_devices/backup_config_mikrotik/config/{{ inventory_hostname }}_config.rsc"
+      delegate_to: localhost
+
+    - name: Run the Python script
+      command: python /var/lib/awx/projects/_12__backup_network_devices/backup_config_mikrotik/connecting_to_gitlab.py
+      delegate_to: localhost

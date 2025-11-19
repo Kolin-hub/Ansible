@@ -1,0 +1,21 @@
+---
+- name: Export Address_List from MikroTik, Download and Compare with Confluence Address_List
+  hosts: all
+  gather_facts: no
+  ignore_unreachable: true
+  tasks:
+    - name: Export Address_List to a file on the MikroTik device
+      community.routeros.command:
+        commands:
+          - /ip firewall address-list print detail without-paging
+      register: mikrotik_export
+       
+    - name: Save Address_List to temporary file
+      copy:
+        content: "{{ mikrotik_export.stdout[0] }}"
+        dest: "/var/lib/awx/projects/_23__address_list/Address_List/{{ inventory_hostname }}_Address_List.txt"
+      delegate_to: localhost
+
+    - name: Run the Python script
+      command: python3 /var/lib/awx/projects/_23__address_list/Address_List/Address_List.py
+      delegate_to: localhost

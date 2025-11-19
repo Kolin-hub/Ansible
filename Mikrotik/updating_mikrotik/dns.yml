@@ -1,0 +1,12 @@
+- hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Добавить DNS сервер 8.8.8.8
+      community.routeros.command:
+        commands:
+          - "/ip dns set servers=8.8.8.8"
+      register: dns_result
+    - name: Показать результат выполнения
+      debug:
+        msg: "DNS сервер 8.8.8.8 успешно добавлен: {{ dns_result }}"

@@ -1,0 +1,17 @@
+- hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Удалить скрипт перезагрузки
+      community.routeros.command:
+        commands:
+          - "/system script remove [find name=reboot_script]"
+
+    - name: Удалить задачу планировщика
+      community.routeros.command:
+        commands:
+          - "/system scheduler remove [find name=reboot_scheduler]"
+
+    - name: Показать результаты удаления
+      debug:
+        msg: "Скрипт перезагрузки и задача планировщика удалены успешно"

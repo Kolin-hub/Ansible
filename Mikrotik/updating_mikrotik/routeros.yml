@@ -1,0 +1,46 @@
+---
+- name: Get RouterOS version from MikroTik devices
+  hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Get RouterOS version
+      community.routeros.command:
+        commands:
+          - /system resource print
+      register: routeros_output
+
+    - name: Extract RouterOS version
+      set_fact:
+        routeros_version: "{{ routeros_output.stdout_lines[0] | select('search', 'version') | list }}"
+
+    - name: Ensure temporary file exists
+      file:
+        path: /tmp/routeros_versions.tmp
+        state: touch
+      delegate_to: localhost
+
+    - name: Add version info to a temporary file
+      lineinfile:
+        path: /tmp/routeros_versions.tmp
+        line: "RouterOS version for {{ inventory_hostname }}: {{ routeros_version[0].split(': ')[1] }}"
+      delegate_to: localhost
+
+- name: Consolidate RouterOS versions to one file
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Ensure target directory exists
+      file:
+        path: /var/lib/awx/projects/_22__updating_mikrotik/updating_mikrotik
+        state: directory
+
+    - name: Copy consolidated versions to final file
+      copy:
+        src: /tmp/routeros_versions.tmp
+        dest: /var/lib/awx/projects/_22__updating_mikrotik/updating_mikrotik/routeros_versions.txt
+
+    - name: Remove temporary file
+      file:
+        path: /tmp/routeros_versions.tmp
+        state: absent

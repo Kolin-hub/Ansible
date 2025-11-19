@@ -1,0 +1,25 @@
+- hosts: all
+  ignore_unreachable: true
+  gather_facts: no
+  tasks:
+    - name: Создать скрипт для перезагрузки с автоматическим подтверждением
+      community.routeros.command:
+        commands:
+          - |
+            /system script add name=reboot_script source={
+              /system reboot;
+            }
+      register: script_creation_result
+
+    - name: Создать задачу в планировщике для выполнения скрипта в 0:00
+      community.routeros.command:
+        commands:
+          - |
+            /system scheduler add name=reboot_scheduler start-time=00:00:00 interval=24h on-event=reboot_script
+      register: scheduler_creation_result
+
+    - name: Показать результаты выполнения скриптов
+      debug:
+        msg:
+          - "Результат создания скрипта: {{ script_creation_result }}"
+          - "Результат создания задачи в планировщике: {{ scheduler_creation_result }}"
